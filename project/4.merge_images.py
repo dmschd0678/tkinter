@@ -35,8 +35,10 @@ def merge_image():
     # print(list_file.get(0,END)) # 모든 파일 목록을 가지고 오기
     images = [Image.open(x) for x in list_file.get(0,END)]
     # size -> size[0] : width, size[1] : height
-    widths = [x.size[0] for x in images]
-    heights = [x.size[1] for x in images]
+    # widths = [x.size[0] for x in images]
+    # heights = [x.size[1] for x in images]
+
+    widths, heights = zip(*(x.size for x in images))
 
     max_width, total_height = max(widths), sum(heights)
     # print(max_width, total_height)
