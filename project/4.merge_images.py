@@ -44,9 +44,19 @@ def merge_image():
     # 스케치북 준비
     result_img = Image.new("RGB",(max_width,total_height), (255,255,255))    # 배경 흰색
     y_offset = 0    # y 위치
-    for img in images:
-        result_img.paste(img, (0,y_offset))
-        y_offset += img.size[1]  # height 값만큼 더해줌
+
+    # for img in images:
+    #     result_img.paste(img, (0,y_offset))
+    #     y_offset += img.size[1]  # height 값만큼 더해줌
+
+    for idx, img in enumerate(images):
+        result_img.paste(img, (0, y_offset))
+        y_offset += img.size[1]
+
+        progress = (idx + 1) / len(images) * 100    # 실제 % 정보를 계산
+        p_var.set(progress)
+        progressbar.update()
+
     dest_path = os.path.join(txt_dest_path.get(),"mergeImage.jpg")
     result_img.save(dest_path)
     msgbox.showinfo("알림", "작업이 완료됨")
