@@ -26,6 +26,7 @@ def del_file():
 def browse_dest_path():
     folder_selected = filedialog.askdirectory()
     if folder_selected == '': # 사용자가 취소를 누를 때
+        print("선택 취소")
         return
     txt_dest_path.delete(0,END)
     txt_dest_path.insert(0,folder_selected)
@@ -35,73 +36,77 @@ def merge_image():
     print("간격 넓이 :", cmb_space.get())
     print("포맷 :", cmb_format.get())
 
-    # 가로 넓이
-    img_width = cmb_width.get()
-    if img_width == "원본유지":
-        img_width = -1
-    else:
-        img_width = int(img_width)
+    try:
+        # 가로 넓이
+        img_width = cmb_width.get()
+        if img_width == "원본유지":
+            img_width = -1
+        else:
+            img_width = int(img_width)
 
-    # 간격
-    img_space = cmb_space.get()
-    if img_space == "좁게":
-        img_space = 30
-    elif img_space == "보통":
-        img_space = 60
-    elif img_space == "넓게":
-        img_space = 90
-    else:
-        img_space = 0
+        # 간격
+        img_space = cmb_space.get()
+        if img_space == "좁게":
+            img_space = 30
+        elif img_space == "보통":
+            img_space = 60
+        elif img_space == "넓게":
+            img_space = 90
+        else:
+            img_space = 0
 
-    # 포맷
-    img_format = cmb_format.get().lower()
+        # 포맷
+        img_format = cmb_format.get().lower()
 
-    #########################################################################
+        #########################################################################
 
-    images = [Image.open(x) for x in list_file.get(0,END)]
+        images = [Image.open(x) for x in list_file.get(0,END)]
 
-    # 이미지 사이즈 리스트에 넣어서 하나씩 처리
-    img_sizes = []  # [(width, height)]
-    if img_width > -1:
-        # width 변경
-        img_sizes = [(int(img_width), int(img_width * x.size[1] / x.size[0])) for x in images]
-    else:
-        # 원본 사이즈 사용
-        img_sizes = [(x.size[0], x.size[1])for x in images]
-
-    # 계산식
-    # 100 * 60 이미지 -> width를 80, height ?
-    # (원본 width) : (원본 height) = (변경 width) : (변경 height)
-    #       100      :     60      =       80     :   ?
-    # 100:60 = 80:48
-
-    widths, heights = zip(*(img_sizes))
-
-    max_width, total_height = max(widths), sum(heights)
-
-    if img_space > 0:   # 이미지 간격 옵션 적용
-        total_height += (img_space * (len(images) - 1))
-
-    # 스케치북 준비
-    result_img = Image.new("RGB",(max_width,total_height), (255,255,255))    # 배경 흰색
-    y_offset = 0    # y 위치
-
-
-    for idx, img in enumerate(images):
-        # width가 원본이 아닐 때 크기 조정
+        # 이미지 사이즈 리스트에 넣어서 하나씩 처리
+        img_sizes = []  # [(width, height)]
         if img_width > -1:
-            img = img.resize(img_sizes[idx])
-        result_img.paste(img, (0, y_offset))
-        y_offset += (img.size[1] + img_space)   # height + 간격
+            # width 변경
+            img_sizes = [(int(img_width), int(img_width * x.size[1] / x.size[0])) for x in images]
+        else:
+            # 원본 사이즈 사용
+            img_sizes = [(x.size[0], x.size[1])for x in images]
 
-        progress = (idx + 1) / len(images) * 100    # 실제 % 정보를 계산
-        p_var.set(progress)
-        progressbar.update()
-    # 포맷 옵션 처리
-    file_name = 'mergeImage.' + img_format
-    dest_path = os.path.join(txt_dest_path.get(),file_name)
-    result_img.save(dest_path)
-    msgbox.showinfo("알림", "작업이 완료됨")
+        # 계산식
+        # 100 * 60 이미지 -> width를 80, height ?
+        # (원본 width) : (원본 height) = (변경 width) : (변경 height)
+        #       100      :     60      =       80     :   ?
+        # 100:60 = 80:48
+
+        widths, heights = zip(*(img_sizes))
+
+        max_width, total_height = max(widths), sum(heights)
+
+        if img_space > 0:   # 이미지 간격 옵션 적용
+            total_height += (img_space * (len(images) - 1))
+
+        # 스케치북 준비
+        result_img = Image.new("RGB",(max_width,total_height), (255,255,255))    # 배경 흰색
+        y_offset = 0    # y 위치
+
+
+        for idx, img in enumerate(images):
+            # width가 원본이 아닐 때 크기 조정
+            if img_width > -1:
+                img = img.resize(img_sizes[idx])
+            result_img.paste(img, (0, y_offset))
+            y_offset += (img.size[1] + img_space)   # height + 간격
+
+            progress = (idx + 1) / len(images) * 100    # 실제 % 정보를 계산
+            p_var.set(progress)
+            progressbar.update()
+        # 포맷 옵션 처리
+        file_name = 'mergeImage.' + img_format
+        dest_path = os.path.join(txt_dest_path.get(),file_name)
+        result_img.save(dest_path)
+        msgbox.showinfo("알림", "작업이 완료됨")
+
+    except Exception as e:
+        msgbox.showerror("에러",e)
 
 # 시작
 def start():
